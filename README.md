@@ -44,6 +44,14 @@ Build a simple IVR/automated attendant by handling DTMF keypresses.
 
 Place all channels that enter into an application into a single holding bridge.
 
+### bridge-infinite-area
+
+Place all channels that enter into an application into a holding bridge. Once all channels have left the bridge, destroy it.
+
+### bridge-dial
+
+Dial an endpoint and put the resulting channel in a mixing bridge with the original Stasis channel. Gracefully handle hangups from either end.
+
 # License
 
 Copyright (c) 2014, Digium, Inc. All rights reserved.
