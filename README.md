@@ -52,6 +52,10 @@ Place all channels that enter into an application into a holding bridge. Once al
 
 Dial an endpoint and put the resulting channel in a mixing bridge with the original Stasis channel. Gracefully handle hangups from either end.
 
+### bridge-move
+
+Put channel that enters Stasis into a holding bridge with music on hold while dialing another endpoint. Once endpoint answers, remove original channel from holding bridge and put both channels in a mixing bridge. Gracefully handle hangups from either end.
+
 # License
 
 Copyright (c) 2014, Digium, Inc. All rights reserved.
