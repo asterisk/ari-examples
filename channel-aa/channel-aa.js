@@ -135,6 +135,8 @@ function clientLoaded (err, client) {
 
     // plays are-you-still-there and restarts the menu
     function stillThere() {
+      console.log('Channel %s stopped paying attention...', channel.name);
+
       channel.play({media: 'sound:are-you-still-there'}, function(err) {
         if (err) {
           throw err;
