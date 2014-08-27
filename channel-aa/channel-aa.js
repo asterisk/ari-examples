@@ -4,7 +4,7 @@
 var ari = require('ari-client');
 var util = require('util');
 
-ari.connect('http://ari.js:8088', 'user', 'secret', clientLoaded);
+ari.connect('http://localhost:8088', 'asterisk', 'asterisk', clientLoaded);
 
 var menu = {
   // valid menu options
@@ -172,5 +172,5 @@ function clientLoaded (err, client) {
     });
   }
 
-  client.start('channel-dump');
+  client.start('channel-aa');
 }
