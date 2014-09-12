@@ -49,23 +49,14 @@ def play_intro_menu(channel):
         None if no playback should occur
         A playback object if a playback was started
         """
-        if (menu_state.current_sound == len(sounds) or menu_state.complete):
+        if menu_state.current_sound == len(sounds) or menu_state.complete:
             return None
         try:
-            current_playback = channel.play(media='sound:%s' % sounds[menu_state.current_sound])
+            current_playback = channel.play(media='sound:%s' %
+                                            sounds[menu_state.current_sound])
         except:
             current_playback = None
         return current_playback
-
-    def on_playback_finished(playback, ev, menu_state):
-        """Callback handler for when a playback is finished
-
-        Keyword Arguments:
-        playback   The playback object that finished
-        ev         The PlaybackFinished event
-        menu_state The current state of the menu
-        """
-        queue_up_sound(channel, menu_state)
 
     def queue_up_sound(channel, menu_state):
         """Start up the next sound and handle whatever happens
@@ -75,9 +66,21 @@ def play_intro_menu(channel):
         menu_state The current state of the menu
         """
 
-        def menu_timeout(channel):
+        def on_playback_finished(playback, ev, menu_state):
+            """Callback handler for when a playback is finished
+
+            Keyword Arguments:
+            playback   The playback object that finished
+            ev         The PlaybackFinished event
+            menu_state The current state of the menu
+            """
+            unsubscribe_playback_event()
+            queue_up_sound(channel, menu_state)
+
+        def menu_timeout(channel, menu_state):
             """Callback called by a timer when the menu times out"""
-            print 'Channel %s stopped paying attention...' % channel.json.get('name')
+            print 'Channel %s stopped paying attention...' % \
+                channel.json.get('name')
             channel.play(media='sound:are-you-still-there')
             play_intro_menu(channel)
 
@@ -88,26 +91,39 @@ def play_intro_menu(channel):
                 current_playback.stop()
             except:
                 pass
+            unsubscribe_cancel_menu_events()
             return
 
         current_playback = play_next_sound(menu_state)
         if not current_playback:
-            if menu_state.current_sound == len(sounds):
+            # only start timer if menu is not complete
+            if menu_state.current_sound == len(sounds) and \
+                    menu_state.complete == False:
                 # Menu played, start a timer!
-                timer = threading.Timer(10, menu_timeout, [channel])
+                timer = threading.Timer(10, menu_timeout, [channel, menu_state])
                 channel_timers[channel.id] = timer
                 timer.start()
             return
 
         menu_state.current_sound += 1
-        current_playback.on_event('PlaybackFinished', on_playback_finished,
-                                  callback_args=[menu_state])
+        playback_event = current_playback.on_event('PlaybackFinished',
+                                                   on_playback_finished,
+                                                   menu_state)
 
         # If the user hits a key or hangs up, cancel the menu operations
-        channel.on_event('ChannelDtmfReceived', cancel_menu,
-                         callback_args=[current_playback, menu_state])
-        channel.on_event('StasisEnd', cancel_menu,
-                         callback_args=[current_playback, menu_state])
+        dtmf_event = channel.on_event('ChannelDtmfReceived', cancel_menu,
+                                      current_playback, menu_state)
+        stasis_end_event = channel.on_event('StasisEnd', cancel_menu,
+                                            current_playback, menu_state)
+
+        def unsubscribe_cancel_menu_events():
+            """Unsubscribe to the ChannelDtmfReceived and StasisEnd events"""
+            dtmf_event.close()
+            stasis_end_event.close()
+
+        def unsubscribe_playback_event():
+            """Unsubscribe to the PlaybackFinished event"""
+            playback_event.close()
 
     queue_up_sound(channel, menu_state)
 
@@ -145,7 +161,7 @@ def cancel_timeout(channel):
         timer.cancel()
         del channel_timers[channel.id]
 
-    
+
 def on_dtmf_received(channel, ev):
     """Our main DTMF handler for a channel in the IVR
 
@@ -175,6 +191,7 @@ def stasis_start_cb(channel_obj, ev):
     channel = channel_obj.get('channel')
     print "Channel %s has entered the application" % channel.json.get('name')
 
+    channel.answer()
     channel.on_event('ChannelDtmfReceived', on_dtmf_received)
     play_intro_menu(channel)
 
