@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import ari
 import logging
 import threading
