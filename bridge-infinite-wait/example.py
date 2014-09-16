@@ -52,7 +52,7 @@ def find_or_create_bridge():
             announcer_timer.start()
 
         bridge.stopMoh()
-        print "Letting the everyone know we care..."
+        print "Letting everyone know we care..."
         thanks_playback = bridge.play(media='sound:thnk-u-for-patience')
         thanks_playback.on_event('PlaybackFinished', on_playback_finished)
 
