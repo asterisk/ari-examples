@@ -60,7 +60,7 @@ function clientLoaded (err, client) {
                   throw err;
                 }
               });
-              playback.on('PlaybackFinished', function(event, playback) {
+              playback.once('PlaybackFinished', function(event, playback) {
                 newBridge.startMoh(function(err) {
                   if (err) {
                     throw err;
@@ -75,7 +75,7 @@ function clientLoaded (err, client) {
     });
 
     function joinBridge(bridge) {
-      channel.on('ChannelLeftBridge', function(event, instances) {
+      channel.once('ChannelLeftBridge', function(event, instances) {
         channelLeftBridge(event, instances, bridge);
       });
 
