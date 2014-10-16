@@ -43,17 +43,17 @@ function clientLoaded (err, client) {
           });
           joinBridge(newBridge);
 
-          timer = setTimeout(play_announcement, 30000)
+          timer = setTimeout(play_announcement, 30000);
 
           // callback that will let our users know how much we care
           function play_announcement() {
-            console.log('Letting everyone know we care...')
+            console.log('Letting everyone know we care...');
             newBridge.stopMoh(function(err) {
               if (err) {
                 throw err;
               }
 
-              var playback = client.Playback()
+              var playback = client.Playback();
               newBridge.play({media: 'sound:thnk-u-for-patience'},
                              playback, function(err, playback) {
                 if (err) {
@@ -67,16 +67,15 @@ function clientLoaded (err, client) {
                   }
                 });
                 timer = setTimeout(play_announcement, 30000);
-                }
               });
-           });
+            });
           }
         });
       }
     });
 
     function joinBridge(bridge) {
-      bridge.on('ChannelLeftBridge', function(event, instances) {
+      channel.on('ChannelLeftBridge', function(event, instances) {
         channelLeftBridge(event, instances, bridge);
       });
 
