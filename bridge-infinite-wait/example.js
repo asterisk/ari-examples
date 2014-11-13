@@ -4,7 +4,8 @@
 var ari = require('ari-client');
 var util = require('util');
 
-ari.connect('http://ari.js:8088', 'user', 'secret', clientLoaded);
+var timer = null;
+ari.connect('http://localhost:8088', 'asterisk', 'asterisk', clientLoaded);
 
 // handler for client being loaded
 function clientLoaded (err, client) {
@@ -33,24 +34,51 @@ function clientLoaded (err, client) {
         client.bridges.create({type: 'holding'}, function(err, newBridge) {
           if (err) {
             throw err;
-          }
-
+          }    
           console.log('Created bridge %s', newBridge.id);
+          newBridge.startMoh(function(err) {
+            if (err) {
+              throw err;
+            }
+          });
           joinBridge(newBridge);
+
+          timer = setTimeout(play_announcement, 30000);
+
+          // callback that will let our users know how much we care
+          function play_announcement() {
+            console.log('Letting everyone know we care...');
+            newBridge.stopMoh(function(err) {
+              if (err) {
+                throw err;
+              }
+
+              var playback = client.Playback();
+              newBridge.play({media: 'sound:thnk-u-for-patience'},
+                             playback, function(err, playback) {
+                if (err) {
+                  throw err;
+                }
+              });
+              playback.once('PlaybackFinished', function(event, playback) {
+                newBridge.startMoh(function(err) {
+                  if (err) {
+                    throw err;
+                  }
+                });
+                timer = setTimeout(play_announcement, 30000);
+              });
+            });
+          }
         });
       }
     });
 
     function joinBridge(bridge) {
-      bridge.on('ChannelLeftBridge', function(event, instances) {
+      channel.once('ChannelLeftBridge', function(event, instances) {
         channelLeftBridge(event, instances, bridge);
       });
 
-      bridge.startMoh(function(err) {
-        if (err) {
-          throw err;
-        }
-      });
       bridge.addChannel({channel: channel.id}, function(err) {
         if (err) {
           throw err;
@@ -60,14 +88,6 @@ function clientLoaded (err, client) {
         if (err) {
           throw err;
         }
-
-        channel.play({media: 'sound:thnk-u-for-patience'},
-            function(err, playback) {
-
-          if (err) {
-            throw err;
-          }
-        });
       });
     }
 
@@ -80,6 +100,10 @@ function clientLoaded (err, client) {
 
       if (holdingBridge.id === bridge.id &&
           holdingBridge.channels.length === 0) {
+
+        if (timer) {
+          clearTimeout(timer);
+        }
 
         bridge.destroy(function(err) {
           if (err) {
@@ -98,5 +122,6 @@ function clientLoaded (err, client) {
   client.on('StasisStart', stasisStart);
   client.on('StasisEnd', stasisEnd);
 
-  client.start('bridge-hold');
+  console.log('starting');
+  client.start('bridge-infinite-wait');
 }
