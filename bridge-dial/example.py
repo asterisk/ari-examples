@@ -12,8 +12,8 @@ client = ari.connect('http://localhost:8088', 'asterisk', 'asterisk')
 def safe_hangup(channel):
     """Safely hang up the specified channel"""
     try:
-        print "Hanging up %s" % channel.json.get('name')
         channel.hangup()
+        print "Hung up {}".format(channel.json.get('name'))
     except requests.HTTPError as e:
         if e.response.status_code != requests.codes.not_found:
             raise e
@@ -48,9 +48,11 @@ def stasis_start_cb(channel_obj, ev):
         channel.hangup()
         return
 
+    print "{} entered our application".format(channel_name)
     channel.ring()
 
     try:
+        print "Dialing {}".format(args[1])
         outgoing = client.channels.originate(endpoint=args[1],
                                              app='bridge-dial',
                                              appArgs='dialed')
