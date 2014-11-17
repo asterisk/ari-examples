@@ -27,11 +27,11 @@ def find_or_create_holding_bridge():
                candidate.json['bridge_type'] == 'holding']
     if bridges:
         bridge = bridges[0]
-        print "Using bridge %s" % bridge.id
+        print "Using bridge {}".format(bridge.id)
     else:
         bridge = client.bridges.create(type='holding')
         bridge.startMoh()
-        print "Created bridge %s" % bridge.id
+        print "Created bridge {}".format(bridge.id)
 
     holding_bridge = bridge
     return holding_bridge
@@ -40,8 +40,8 @@ def find_or_create_holding_bridge():
 def safe_hangup(channel):
     """Safely hang up the specified channel"""
     try:
-        print "Hanging up %s" % channel.json.get('name')
         channel.hangup()
+        print "Hung up {}".format(channel.json.get('name'))
     except requests.HTTPError as e:
         if e.response.status_code != requests.codes.not_found:
             raise e
