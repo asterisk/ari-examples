@@ -1,7 +1,7 @@
 # Asterisk ARI examples
 
 This repository contains a collection of ARI examples, written primarily in
-Python and JavaScript (Node.js). These ARI examples coincide with ARI
+Python, JavaScript (Node.js) and C#. These ARI examples coincide with ARI
 documentation on the Asterisk wiki:
 
 https://wiki.asterisk.org/wiki/display/AST/Getting+Started+with+ARI
@@ -13,6 +13,10 @@ https://github.com/asterisk/ari-py
 The JavaScript examples use the node-ari-client library:
 
 https://github.com/asterisk/node-ari-client
+
+The .NET examples use the AsterNET.ARI client library:
+
+https://github.com/skrusty/AsterNET.ARI
 
 # Example Directory
 
